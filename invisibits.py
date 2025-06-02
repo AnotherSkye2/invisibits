@@ -8,16 +8,25 @@ def ReadAndWriteSinglePixel():
     img = cv.imread(imgPath)
     imgRGB = cv.cvtColor(img, cv.COLOR_BGR2RGB)
 
-    pixelLSBValues = []
-    for i in range(120):
-        pixel = imgRGB[i, 0]
-        for j in pixel:
-            if(j % 2 == 0):
-                pixelLSBValues.append(0)
-            else: 
-                pixelLSBValues.append(1)
+    # pixelLSBValues = []
+    # for i in range(len(imgRGB)):
+    #     pixel = imgRGB[i, 0]
+    #     for j in pixel:
+    #         if(j % 2 == 0):
+    #             pixelLSBValues.append(0)
+    #         else: 
+    #             pixelLSBValues.append(1)
+
+    # print(pixelLSBValues)
     
-    print(pixelLSBValues)
+    for i in range(len(imgRGB)):
+        for j in range(len(imgRGB[i])):
+            imgRGB[i, j] = (255, 0, 0)
+    plt.figure()
+    plt.imshow(imgRGB)
+    plt.show()
+    
+    plt.imsave('red.jpg', imgRGB)
 
 if __name__ == '__main__':
     ReadAndWriteSinglePixel()
