@@ -8,8 +8,6 @@ def EncodeDataIntoImage(inputString):
     imgPath = os.path.join(root, 'images/cover.png')
     img = cv.imread(imgPath)
     imgRGB = cv.cvtColor(img, cv.COLOR_BGR2RGB)
-    print(imgRGB[0][0])
-
 
     key = "&&&"
     bitArrayString = ' '.join('{0:08b}'.format(ord(x), 'b') for x in inputString+key).replace(" ", "")    
@@ -41,11 +39,9 @@ def DecodeDataFromImage(imgPath):
     key = "001001100010011000100110"
     img = cv.imread(imgPath)
     imgRGB = cv.cvtColor(img, cv.COLOR_BGR2RGB)
-    print(imgRGB[0][0])
 
     pixelLSBValues = []
     keyFound = False
-    byteCounter = 0
     for i in range(1):
         if keyFound:
             break
@@ -63,7 +59,7 @@ def DecodeDataFromImage(imgPath):
                     pixelLSBValues.append('0')
                 else: 
                     pixelLSBValues.append('1')
-    print("".join(pixelLSBValues))
+
     print(BitStringToString("".join(pixelLSBValues)))
 
 if __name__ == '__main__':
