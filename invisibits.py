@@ -5,14 +5,15 @@ from dotenv import load_dotenv
 
 def EncodeDataIntoImage(inputString):
     root = os.getcwd()
-    imgPath = os.path.join(root, 'images/kollane_lill.jpg')
+    imgPath = os.path.join(root, 'images/cover.png')
     img = cv.imread(imgPath)
     imgRGB = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+    print(imgRGB[0][0])
 
-    bitArrayString = ' '.join('{0:08b}'.format(ord(x), 'b') for x in inputString).replace(" ", "")
-    byteArrayStringLength = len(bitArrayString)
+
+    key = "&&&"
+    bitArrayString = ' '.join('{0:08b}'.format(ord(x), 'b') for x in inputString+key).replace(" ", "")    
     print(bitArrayString)
-    
    
     for i in range(len(imgRGB)):
         if len(bitArrayString) <= 0:
@@ -29,36 +30,47 @@ def EncodeDataIntoImage(inputString):
                         else:
                             imgRGB[i, j][k] += 1
                     bitArrayString = bitArrayString[1:]
+    print(imgRGB[0][0])
+
+    plt.imsave('images/img.png', imgRGB)
+
+def BitStringToString(s):
+    return (int(s, 2).to_bytes((len(s) + 7) // 8, byteorder='big')).decode('utf-8')
+
+def DecodeDataFromImage(imgPath):
+    key = "001001100010011000100110"
+    img = cv.imread(imgPath)
+    imgRGB = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+    print(imgRGB[0][0])
 
     pixelLSBValues = []
-    for i in range(len(imgRGB)):
-        if len(pixelLSBValues) >= byteArrayStringLength:
+    keyFound = False
+    byteCounter = 0
+    for i in range(1):
+        if keyFound:
             break
-        for j in range(len(imgRGB[0])):
-            if len(pixelLSBValues) >= byteArrayStringLength:
+        for j in range(len(imgRGB[i])):
+            if keyFound:
                 break
             pixel = imgRGB[i, j]
             for k in pixel:
+                if len(pixelLSBValues) > len(key):
+                    potentialKey = "".join(pixelLSBValues[-len(key):])
+                    if potentialKey == key:
+                        keyFound = True
+                        break
                 if(k % 2 == 0):
                     pixelLSBValues.append('0')
                 else: 
                     pixelLSBValues.append('1')
-
-    assert("".join(pixelLSBValues[:byteArrayStringLength]) == ' '.join('{0:08b}'.format(ord(x), 'b') for x in inputString).replace(" ", ""))
-
-    print(BitStringToString("".join(pixelLSBValues[:byteArrayStringLength])))
-
-    # for i in range(len(imgRGB)):
-    #     for j in range(len(imgRGB[i])):
-    #         imgRGB[i, j] = (255, 0, 0)
-
-    # plt.imsave('red.jpg', imgRGB)
-
-def BitStringToString(s):
-    return (int(s, 2).to_bytes((len(s) + 7) // 8, byteorder='big')).decode('utf-8')
+    print("".join(pixelLSBValues))
+    print(BitStringToString("".join(pixelLSBValues)))
 
 if __name__ == '__main__':
     load_dotenv()
 
     INPUT_STRING=os.getenv("INPUT_STRING")
+    IMAGE_PATH='images/img.png'
     EncodeDataIntoImage(INPUT_STRING)
+    DecodeDataFromImage(IMAGE_PATH)
+
