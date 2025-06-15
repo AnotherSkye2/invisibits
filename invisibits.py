@@ -42,7 +42,7 @@ def DecodeDataFromImage(imgPath):
 
     pixelLSBValues = []
     keyFound = False
-    for i in range(1):
+    for i in range(len(imgRGB)):
         if keyFound:
             break
         for j in range(len(imgRGB[i])):
