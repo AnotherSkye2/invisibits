@@ -3,6 +3,8 @@ import os
 import matplotlib.pyplot as plt
 from dotenv import load_dotenv
 import cherrypy
+import random
+import string
 
 def EncodeDataIntoImage(inputString):
     root = os.getcwd()
@@ -68,6 +70,11 @@ class Root:
     def index(self):
         return "aaa"
     
+    @cherrypy.expose
+    @cherrypy.tools.json_out()
+    def generate(self, length=8):
+        return ''.join(random.sample(string.hexdigits, int(length)))
+    
     index_shtml = index_html = index_htm = index_php = index
 
 
@@ -75,13 +82,13 @@ if __name__=='__main__':
     location = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'static')  
     print( "\nstatic_dir: %s\n" % location)
 
-    cherrypy.config.update( {  # I prefer configuring the server here, instead of in an external file.
+    cherrypy.config.update( {
             'server.socket_host': '0.0.0.0',
             'server.socket_port': 8001,
         } )
     conf = {
         '/': {  # Root folder.
-            'tools.staticdir.on':   True,  # Enable or disable this rule.
+            'tools.staticdir.on':   True, 
             'tools.staticdir.dir':  '',
             'tools.staticdir.root': location,
             'tools.staticdir.index': "index.html",
@@ -89,4 +96,4 @@ if __name__=='__main__':
         }
     }
 
-    cherrypy.quickstart(Root(), '/', config=conf)  # ..and LAUNCH ! :)
+    cherrypy.quickstart(Root(), '/', config=conf)
