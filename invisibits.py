@@ -2,6 +2,7 @@ import cv2 as cv
 import os
 import matplotlib.pyplot as plt
 from dotenv import load_dotenv
+import cherrypy
 
 def EncodeDataIntoImage(inputString):
     root = os.getcwd()
@@ -60,13 +61,32 @@ def DecodeDataFromImage(imgPath):
                 else: 
                     pixelLSBValues.append('1')
 
-    print(BitStringToString("".join(pixelLSBValues)))
+    return BitStringToString("".join(pixelLSBValues[:len(pixelLSBValues)-len(key)]))
 
-if __name__ == '__main__':
-    load_dotenv()
+class Root:
+    @cherrypy.expose
+    def index(self):
+        return "aaa"
+    
+    index_shtml = index_html = index_htm = index_php = index
 
-    INPUT_STRING=os.getenv("INPUT_STRING")
-    IMAGE_PATH='images/img.png'
-    EncodeDataIntoImage(INPUT_STRING)
-    DecodeDataFromImage(IMAGE_PATH)
 
+if __name__=='__main__':
+    location = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'static')  
+    print( "\nstatic_dir: %s\n" % location)
+
+    cherrypy.config.update( {  # I prefer configuring the server here, instead of in an external file.
+            'server.socket_host': '0.0.0.0',
+            'server.socket_port': 8001,
+        } )
+    conf = {
+        '/': {  # Root folder.
+            'tools.staticdir.on':   True,  # Enable or disable this rule.
+            'tools.staticdir.dir':  '',
+            'tools.staticdir.root': location,
+            'tools.staticdir.index': "index.html",
+
+        }
+    }
+
+    cherrypy.quickstart(Root(), '/', config=conf)  # ..and LAUNCH ! :)
