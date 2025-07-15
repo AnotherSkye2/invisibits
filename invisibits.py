@@ -3,8 +3,10 @@ import os
 import matplotlib.pyplot as plt
 from dotenv import load_dotenv
 import cherrypy
-import random
-import string
+from cherrypy.lib.static import serve_download
+
+localDir = os.path.dirname(__file__)
+absDir = os.path.join(os.getcwd(), localDir)
 
 def EncodeDataIntoImage(inputString):
     root = os.getcwd()
@@ -71,11 +73,16 @@ class Root:
         return "aaa"
     
     @cherrypy.expose
-    @cherrypy.tools.json_out()
-    def generate(self, length=8):
-        return ''.join(random.sample(string.hexdigits, int(length)))
+    def generate(self):
+        return """<a href="./images/img.png" download="image.png">Download</a>"""
+    
+    @cherrypy.expose
+    def download(self):
+        path = os.path.join(absDir, './images/img.png')
+        return serve_download(path, "img.png")
     
     index_shtml = index_html = index_htm = index_php = index
+    generate_html = generate
 
 
 if __name__=='__main__':
