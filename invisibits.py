@@ -120,9 +120,9 @@ class Root:
         return out
     
     @cherrypy.expose
-    def download(self):
-        path = os.path.join(absDir, './images/img.png')
-        return serve_download(path, "img.png")
+    def download(self, fileName):
+        path = os.path.join(absDir, './images/'+fileName)
+        return serve_download(path, fileName)
     
     index_shtml = index_html = index_htm = index_php = index
 

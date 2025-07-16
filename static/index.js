@@ -39,10 +39,10 @@ async function EncodeHandler(e) {
     const textForm = document.querySelector("#text-form")
     const formData = new FormData(textForm)
     const fileNameArray = input.value.split("\\")
-    const fileName = fileNameArray[fileNameArray.length-1]
-    console.log(formData, fileName)
+    const fullFileName = fileNameArray[fileNameArray.length-1]
+    console.log(formData, fullFileName)
     try {
-        const response = await fetch(`./encode?fileName=${fileName}`, {
+        const response = await fetch(`./encode?fileName=${fullFileName}`, {
             method: "POST",
             body: formData
         })
@@ -52,7 +52,10 @@ async function EncodeHandler(e) {
     } catch(err) {
         console.error(err)
     }
-    
+    const fileDownloadNameArray = fullFileName.split('.')
+    const fileExtension = fileDownloadNameArray[1]
+    const fileName = fileDownloadNameArray[0]
+    window.location.href = `./download?fileName=${fileName+'_steg.'+fileExtension}`
 }
 
 window.onload = (event) => {   
