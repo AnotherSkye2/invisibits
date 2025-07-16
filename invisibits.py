@@ -13,9 +13,10 @@ def readf(filename):
     read = file.read()
     return read
 
-def EncodeDataIntoImage(inputString, imgPath):
+def EncodeDataIntoImage(inputString, imgPath, fullFileName):
     root = os.getcwd()
     imgPath = os.path.join(root, imgPath)
+    print(imgPath)
     img = cv.imread(imgPath)
     imgRGB = cv.cvtColor(img, cv.COLOR_BGR2RGB)
 
@@ -40,7 +41,11 @@ def EncodeDataIntoImage(inputString, imgPath):
                     bitArrayString = bitArrayString[1:]
     print(imgRGB[0][0])
 
-    plt.imsave('images/img.png', imgRGB)
+    fileNameArray = fullFileName.split('.')
+    fileExtension = fileNameArray[1]
+    print(fileExtension)
+    fileName = fileNameArray[0]
+    plt.imsave('images/'+fileName+'_steg.'+fileExtension, imgRGB)
 
 def BitStringToString(s):
     return (int(s, 2).to_bytes((len(s) + 7) // 8, byteorder='big')).decode('utf-8')
@@ -81,7 +86,7 @@ class Root:
     def upload(self, imgFile, fileName):
         upload_path = os.path.join(localDir, "./images")
 
-        upload_filename = fileName.split("\\")[-1]
+        upload_filename = fileName
 
         print("imgFile", imgFile, "\nfileName", fileName)
 
@@ -104,10 +109,15 @@ class Root:
         return out
     
     @cherrypy.expose
-    def generate(self, inputString, fileName):
-        imgPath = os.path.join("./images/", fileName)
-        EncodeDataIntoImage(inputString, imgPath)
-        return "generate"
+    def encode(self, inputString, fileName):
+        imgPath = os.path.join("images/", fileName)
+        print(imgPath)
+        EncodeDataIntoImage(inputString, imgPath, fileName)
+        out = '''
+        Image encoded.
+        Filename: {}
+        ''' .format(fileName)
+        return out
     
     @cherrypy.expose
     def download(self):
@@ -115,7 +125,6 @@ class Root:
         return serve_download(path, "img.png")
     
     index_shtml = index_html = index_htm = index_php = index
-    generate_html = generate
 
 
 if __name__=='__main__':
