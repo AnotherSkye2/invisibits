@@ -4,13 +4,23 @@
         <script src="index.js"></script>
     </head>
     <body>
-        <form id="img-form">
-        <input type='file' name="imgFile"/>
-        </form>
-        <br><img id="myImg" src="#">
-        <form id="text-form">
-            <input type="text" name="inputString"/>
-            <button type="submit">Encode</button>
-        </form>
+        <div id="encode">
+            <form id="img-form">
+            <input type='file' name="imgFile"/>
+            </form>
+            <br><img src="#">
+            <form id="text-form">
+                <input type="text" name="inputString"/>
+                <button type="submit">Encode</button>
+            </form>
+        </div>
+        <div id="decode">
+            <form id="img-form">
+                <input type='file' name="imgFile"/> 
+            </form>
+            <br><img src="#">
+            <input type="text" name="outputString" readonly/>
+        </div>
+
     </body>
 </html>

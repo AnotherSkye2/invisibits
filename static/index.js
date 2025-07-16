@@ -15,10 +15,10 @@ async function UploadHandler() {
         }
         img.src = URL.createObjectURL(this.files[0]);
 
-        imgForm = document.querySelector("#img-form")
+        imgForm = document.querySelector('div[id="encode"] #img-form')
         const formData = new FormData(imgForm)
         const fileName = input.value.split("\\")[-1]
-        console.log(formData)
+        console.log(formData, imgForm)
         try {
             const response = await fetch(`./upload?fileName=${fileName}`, {
                 method: "POST",
@@ -35,8 +35,8 @@ async function UploadHandler() {
 
 async function EncodeHandler(e) {
     e.preventDefault()
-    const input = document.querySelector('input[type="file"]')
-    const textForm = document.querySelector("#text-form")
+    const input = document.querySelector('div[id="encode"] input[type="file"]')
+    const textForm = document.querySelector('div[id="encode"] #text-form')
     const formData = new FormData(textForm)
     const fileNameArray = input.value.split("\\")
     const fullFileName = fileNameArray[fileNameArray.length-1]
@@ -60,10 +60,10 @@ async function EncodeHandler(e) {
 
 window.onload = (event) => {   
     console.log("page is fully loaded");
-    const input = document.querySelector('input[type="file"]')
-    const textForm = document.querySelector("#text-form")
-    console.log(input)
-    input.addEventListener('change', UploadHandler)
+    const encodeInput = document.querySelector('div[id="encode"] input[type="file"]')
+    const textForm = document.querySelector('div[id="encode"] #text-form')
+    console.log(encodeInput, textForm)
+    encodeInput.addEventListener('change', UploadHandler)
     textForm.addEventListener('submit', EncodeHandler)
     // const form = document.getElementById("form");
     // form.addEventListener("submit", logSubmit);
