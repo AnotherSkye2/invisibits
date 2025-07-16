@@ -58,13 +58,30 @@ async function EncodeHandler(e) {
     window.location.href = `./download?fileName=${fileName+'_steg.'+fileExtension}`
 }
 
+function DisplayHandler(id) {
+    let hiddenStatus
+    const encodeDiv = document.querySelector(`div[id="encode"]`)
+    const decodeDiv = document.querySelector(`div[id="decode"]`)
+    if (id == "encode") {
+        encodeDiv.hidden = false
+        decodeDiv.hidden = true
+    } else {
+        encodeDiv.hidden = true
+        decodeDiv.hidden = false
+    }
+}
+
 window.onload = (event) => {   
     console.log("page is fully loaded");
     const encodeInput = document.querySelector('div[id="encode"] input[type="file"]')
     const textForm = document.querySelector('div[id="encode"] #text-form')
-    console.log(encodeInput, textForm)
+    const displayButtons = document.getElementsByClassName('display')
+    console.log(encodeInput, textForm, displayButtons)
     encodeInput.addEventListener('change', UploadHandler)
     textForm.addEventListener('submit', EncodeHandler)
+    for(let button of displayButtons) {
+        button.addEventListener('click', () => DisplayHandler(button.id))
+    };
     // const form = document.getElementById("form");
     // form.addEventListener("submit", logSubmit);
 }
