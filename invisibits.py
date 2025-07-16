@@ -8,9 +8,14 @@ from cherrypy.lib.static import serve_download
 localDir = os.path.dirname(__file__)
 absDir = os.path.join(os.getcwd(), localDir)
 
-def EncodeDataIntoImage(inputString):
+def readf(filename):
+    file = open(filename)
+    read = file.read()
+    return read
+
+def EncodeDataIntoImage(inputString, imgPath):
     root = os.getcwd()
-    imgPath = os.path.join(root, 'images/cover.png')
+    imgPath = os.path.join(root, imgPath)
     img = cv.imread(imgPath)
     imgRGB = cv.cvtColor(img, cv.COLOR_BGR2RGB)
 
@@ -73,8 +78,36 @@ class Root:
         return "aaa"
     
     @cherrypy.expose
-    def generate(self):
-        return """<a href="./images/img.png" download="image.png">Download</a>"""
+    def upload(self, imgFile, fileName):
+        upload_path = os.path.join(localDir, "./images")
+
+        upload_filename = fileName.split("\\")[-1]
+
+        print("imgFile", imgFile, "\nfileName", fileName)
+
+        upload_file = os.path.normpath(
+            os.path.join(upload_path, upload_filename))
+        size = 0
+        with open(upload_file, 'wb') as out:
+            while True:
+                data = imgFile.file.read(8192)
+                if not data:
+                    break
+                out.write(data)
+                size += len(data)
+        out = '''
+        File received.
+        Filename: {}
+        Length: {}
+        Mime-type: {}
+        ''' .format(imgFile.filename, size, imgFile.content_type, data)
+        return out
+    
+    @cherrypy.expose
+    def generate(self, inputString, fileName):
+        imgPath = os.path.join("./images/", fileName)
+        EncodeDataIntoImage(inputString, imgPath)
+        return "generate"
     
     @cherrypy.expose
     def download(self):
