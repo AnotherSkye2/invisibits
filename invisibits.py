@@ -1,52 +1,139 @@
 import cv2 as cv
 import os
 import matplotlib.pyplot as plt
+from dotenv import load_dotenv
+import cherrypy
+from cherrypy.lib.static import serve_download
 
-def EncodeDataIntoImage():
+localDir = os.path.dirname(__file__)
+absDir = os.path.join(os.getcwd(), localDir)
+
+def readf(filename):
+    file = open(filename)
+    read = file.read()
+    return read
+
+def EncodeDataIntoImage(inputString, imgPath):
     root = os.getcwd()
-    imgPath = os.path.join(root, 'images/kollane_lill.jpg')
+    imgPath = os.path.join(root, imgPath)
     img = cv.imread(imgPath)
     imgRGB = cv.cvtColor(img, cv.COLOR_BGR2RGB)
 
-    
-    testString = 'test'
-    byteArrayString = ' '.join('{0:08b}'.format(ord(x), 'b') for x in testString).replace(" ", "")
-    byteArrayStringLength = len(byteArrayString)
-    print(byteArrayString)
-    
+    key = "&&&"
+    bitArrayString = ' '.join('{0:08b}'.format(ord(x), 'b') for x in inputString+key).replace(" ", "")    
+    print(bitArrayString)
    
     for i in range(len(imgRGB)):
-        if len(byteArrayString) <= 0:
+        if len(bitArrayString) <= 0:
             break
         else:
             for j in range(len(imgRGB[i])):
                 pixel = imgRGB[i, j]
                 for k in range(len(pixel)):
-                    if len(byteArrayString) <= 0:
+                    if len(bitArrayString) <= 0:
                         break
-                    if int(byteArrayString[0]) != pixel[k] % 2:
+                    if int(bitArrayString[0]) != pixel[k] % 2:
                         if pixel[k] > 0:
                             imgRGB[i, j][k] -= 1
                         else:
                             imgRGB[i, j][k] += 1
-                    byteArrayString = byteArrayString[1:]
+                    bitArrayString = bitArrayString[1:]
+    print(imgRGB[0][0])
+
+    plt.imsave('images/img.png', imgRGB)
+
+def BitStringToString(s):
+    return (int(s, 2).to_bytes((len(s) + 7) // 8, byteorder='big')).decode('utf-8')
+
+def DecodeDataFromImage(imgPath):
+    key = "001001100010011000100110"
+    img = cv.imread(imgPath)
+    imgRGB = cv.cvtColor(img, cv.COLOR_BGR2RGB)
 
     pixelLSBValues = []
-    for i in range(len(imgRGB[0])):
-        pixel = imgRGB[0, i]
-        for k in pixel:
-            if(k % 2 == 0):
-                pixelLSBValues.append('0')
-            else: 
-                pixelLSBValues.append('1')
+    keyFound = False
+    for i in range(len(imgRGB)):
+        if keyFound:
+            break
+        for j in range(len(imgRGB[i])):
+            if keyFound:
+                break
+            pixel = imgRGB[i, j]
+            for k in pixel:
+                if len(pixelLSBValues) > len(key):
+                    potentialKey = "".join(pixelLSBValues[-len(key):])
+                    if potentialKey == key:
+                        keyFound = True
+                        break
+                if(k % 2 == 0):
+                    pixelLSBValues.append('0')
+                else: 
+                    pixelLSBValues.append('1')
 
-    assert("".join(pixelLSBValues[:byteArrayStringLength]) == ' '.join('{0:08b}'.format(ord(x), 'b') for x in testString).replace(" ", ""))
+    return BitStringToString("".join(pixelLSBValues[:len(pixelLSBValues)-len(key)]))
 
-    # for i in range(len(imgRGB)):
-    #     for j in range(len(imgRGB[i])):
-    #         imgRGB[i, j] = (255, 0, 0)
+class Root:
+    @cherrypy.expose
+    def index(self):
+        return "aaa"
+    
+    @cherrypy.expose
+    def upload(self, imgFile, fileName):
+        upload_path = os.path.join(localDir, "./images")
 
-    # plt.imsave('red.jpg', imgRGB)
+        upload_filename = fileName.split("\\")[-1]
 
-if __name__ == '__main__':
-    EncodeDataIntoImage()
+        print("imgFile", imgFile, "\nfileName", fileName)
+
+        upload_file = os.path.normpath(
+            os.path.join(upload_path, upload_filename))
+        size = 0
+        with open(upload_file, 'wb') as out:
+            while True:
+                data = imgFile.file.read(8192)
+                if not data:
+                    break
+                out.write(data)
+                size += len(data)
+        out = '''
+        File received.
+        Filename: {}
+        Length: {}
+        Mime-type: {}
+        ''' .format(imgFile.filename, size, imgFile.content_type, data)
+        return out
+    
+    @cherrypy.expose
+    def generate(self, inputString, fileName):
+        imgPath = os.path.join("./images/", fileName)
+        EncodeDataIntoImage(inputString, imgPath)
+        return "generate"
+    
+    @cherrypy.expose
+    def download(self):
+        path = os.path.join(absDir, './images/img.png')
+        return serve_download(path, "img.png")
+    
+    index_shtml = index_html = index_htm = index_php = index
+    generate_html = generate
+
+
+if __name__=='__main__':
+    location = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'static')  
+    print( "\nstatic_dir: %s\n" % location)
+
+    cherrypy.config.update( {
+            'server.socket_host': '0.0.0.0',
+            'server.socket_port': 8001,
+        } )
+    conf = {
+        '/': {  # Root folder.
+            'tools.staticdir.on':   True, 
+            'tools.staticdir.dir':  '',
+            'tools.staticdir.root': location,
+            'tools.staticdir.index': "index.html",
+
+        }
+    }
+
+    cherrypy.quickstart(Root(), '/', config=conf)
