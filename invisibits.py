@@ -14,22 +14,34 @@ def readf(filename):
     read = file.read()
     return read
 
-def EncodeDataIntoImage(inputString, imgPath, fullFileName):
+def EncodeDataIntoImage(inputString, imgPath, fullFileName, password):
     root = os.getcwd()
     imgPath = os.path.join(root, imgPath)
-    print(imgPath)
+    print(imgPath, password)
     img = cv.imread(imgPath)
     imgRGB = cv.cvtColor(img, cv.COLOR_BGR2RGB)
 
     key = "&&&"
     bitArrayString = ' '.join('{0:08b}'.format(ord(x), 'b') for x in inputString+key).replace(" ", "")    
     print(bitArrayString)
+
+    passwordValue = 0
+    for char in password:
+        passwordValue += ord(char) 
+    
+    passwordValue = passwordValue%len(imgRGB) # Normalize passwordValue within the bounds of image pixel length
    
+    print("passwordValue: ", passwordValue)
+    
     for i in range(len(imgRGB)):
         if len(bitArrayString) <= 0:
             break
         else:
-            for j in range(len(imgRGB[i])):
+            print("new row!")
+            j = 0
+            jumpedForward = False
+            while j < len(imgRGB[i]):
+                print(j, len(imgRGB[i]))
                 pixel = imgRGB[i, j]
                 for k in range(len(pixel)):
                     if len(bitArrayString) <= 0:
@@ -40,6 +52,14 @@ def EncodeDataIntoImage(inputString, imgPath, fullFileName):
                         else:
                             imgRGB[i, j][k] += 1
                     bitArrayString = bitArrayString[1:]
+                print(jumpedForward)
+                if jumpedForward == False:
+                    j += passwordValue+1
+                    jumpedForward = True
+                elif jumpedForward == True:
+                    j -= passwordValue
+                    jumpedForward = False
+      
     print(imgRGB[0][0])
 
     fileNameArray = fullFileName.split('.')
@@ -51,17 +71,29 @@ def EncodeDataIntoImage(inputString, imgPath, fullFileName):
 def BitStringToString(s):
     return (int(s, 2).to_bytes((len(s) + 7) // 8, byteorder='big')).decode('utf-8')
 
-def DecodeDataFromImage(imgPath):
+def DecodeDataFromImage(imgPath, password):
     key = "001001100010011000100110"
     img = cv.imread(imgPath)
     imgRGB = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+
+    passwordValue = 0
+    for char in password:
+        passwordValue += ord(char) 
+    
+    passwordValue = passwordValue%len(imgRGB) # Normalize passwordValue within the bounds of image pixel length
+   
+    print("passwordValue: ", passwordValue)
 
     pixelLSBValues = []
     keyFound = False
     for i in range(len(imgRGB)):
         if keyFound:
             break
-        for j in range(len(imgRGB[i])):
+        print("new row!")
+        j = 0
+        jumpedForward = False
+        while j < len(imgRGB[i]):
+            print(j, len(imgRGB[i]))
             if keyFound:
                 break
             pixel = imgRGB[i, j]
@@ -75,7 +107,13 @@ def DecodeDataFromImage(imgPath):
                     pixelLSBValues.append('0')
                 else: 
                     pixelLSBValues.append('1')
-
+            if jumpedForward == False:
+                j += passwordValue+1
+                jumpedForward = True
+            elif jumpedForward == True:
+                j -= passwordValue
+                jumpedForward = False
+    print("".join(pixelLSBValues))
     return BitStringToString("".join(pixelLSBValues[:len(pixelLSBValues)-len(key)]))
 
 class Root:
@@ -113,7 +151,7 @@ class Root:
     def encode(self, inputString, fileName, password):
         imgPath = os.path.join("images/", fileName)
         print("imgPath: ", imgPath, "password: ", password)
-        EncodeDataIntoImage(inputString, imgPath, fileName)
+        EncodeDataIntoImage(inputString, imgPath, fileName, password)
         out = '''
         Image encoded.
         Filename: {}
@@ -124,7 +162,7 @@ class Root:
     def decode(self, fileName, password):
         imgPath = os.path.join("images/", fileName)
         print("imgPath: ", imgPath, "password: ", password)
-        return encode(DecodeDataFromImage(imgPath))
+        return encode(DecodeDataFromImage(imgPath, password))
     
     
     @cherrypy.expose
