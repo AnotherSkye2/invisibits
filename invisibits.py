@@ -3,6 +3,7 @@ import os
 import matplotlib.pyplot as plt
 from dotenv import load_dotenv
 import cherrypy
+from cherrypy._json import encode
 from cherrypy.lib.static import serve_download
 
 localDir = os.path.dirname(__file__)
@@ -88,7 +89,7 @@ class Root:
 
         upload_filename = fileName
 
-        print("imgFile", imgFile, "\nfileName", fileName)
+        print("\nimgFile: ", imgFile, "\nfileName: ", fileName)
 
         upload_file = os.path.normpath(
             os.path.join(upload_path, upload_filename))
@@ -118,6 +119,13 @@ class Root:
         Filename: {}
         ''' .format(fileName)
         return out
+    
+    @cherrypy.expose
+    def decode(self, fileName):
+        imgPath = os.path.join("images/", fileName)
+        print("imgPath: ", imgPath)
+        return encode(DecodeDataFromImage(imgPath))
+    
     
     @cherrypy.expose
     def download(self, fileName):
