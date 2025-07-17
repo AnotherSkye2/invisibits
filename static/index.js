@@ -68,6 +68,8 @@ async function DecodeHandler(e) {
 
         if(!response.ok) throw new Error(response.statusText)
         const data = await response.json()
+        const textInput = document.querySelector('div[id="decode"] #output')
+        textInput.value = data
         console.log(data)
         console.log(response.statusText)
     } catch(err) {
