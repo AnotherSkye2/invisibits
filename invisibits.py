@@ -84,7 +84,7 @@ class Root:
         return "aaa"
     
     @cherrypy.expose
-    def upload(self, imgFile, fileName):
+    def upload(self, imgFile, fileName, password):
         upload_path = os.path.join(localDir, "./images")
 
         upload_filename = fileName
@@ -110,9 +110,9 @@ class Root:
         return out
     
     @cherrypy.expose
-    def encode(self, inputString, fileName):
+    def encode(self, inputString, fileName, password):
         imgPath = os.path.join("images/", fileName)
-        print(imgPath)
+        print("imgPath: ", imgPath, "password: ", password)
         EncodeDataIntoImage(inputString, imgPath, fileName)
         out = '''
         Image encoded.
@@ -121,9 +121,9 @@ class Root:
         return out
     
     @cherrypy.expose
-    def decode(self, fileName):
+    def decode(self, fileName, password):
         imgPath = os.path.join("images/", fileName)
-        print("imgPath: ", imgPath)
+        print("imgPath: ", imgPath, "password: ", password)
         return encode(DecodeDataFromImage(imgPath))
     
     
