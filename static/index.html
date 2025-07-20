@@ -26,7 +26,13 @@
             <br><img src="#">
             <input type="text" id="output" name="outputString" readonly/>
         </div>
-        <button class="display" id="encode">Encode</button>
-        <button class="display" id="decode">Decode</button>
+        <div style="display: grid; width: 60px; gap: 15px;">
+            <label for="modeButtons">Mode:</label>
+            <div id="modeButtons" style="display: grid; width: 60px; gap: 15px;">
+                <button class="display" id="encode">Encode</button>
+                <button class="display" id="decode">Decode</button>
+            </div>
+            <p id="errorMessage" name="error"></p>
+        </div>
     </body>
 </html>

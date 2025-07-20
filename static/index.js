@@ -76,8 +76,13 @@ async function DecodeHandler(e) {
         if(!response.ok) throw new Error(response.statusText)
         const data = await response.json()
         const textInput = document.querySelector('div[id="decode"] #output')
-        textInput.value = data
-        console.log(data)
+        const errorMessage = document.querySelector('#errorMessage')
+        if (data.error) {
+            errorMessage.innerHTML = data.error
+        } else {
+            textInput.value = data
+        }
+        console.log(data, typeof data)
         console.log(response.statusText)
     } catch(err) {
         console.error(err)

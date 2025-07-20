@@ -21,7 +21,11 @@ def EncodeDataIntoImage(inputString, imgPath, fullFileName, password):
     img = cv.imread(imgPath)
     imgRGB = cv.cvtColor(img, cv.COLOR_BGR2RGB)
 
-    key = "&&&"
+    if (password == ""):
+        key = "&&&"
+    else:
+        key = password
+    
     bitArrayString = ' '.join('{0:08b}'.format(ord(x), 'b') for x in inputString+key).replace(" ", "")    
     print(bitArrayString)
 
@@ -74,7 +78,10 @@ def BitStringToString(s):
     return (int(s, 2).to_bytes((len(s) + 7) // 8, byteorder='big')).decode('utf-8')
 
 def DecodeDataFromImage(imgPath, password):
-    key = "001001100010011000100110"
+    if (password == ""):
+        key = "001001100010011000100110" # binary for "&&&"
+    else:
+        key = StringToBinary(password)
     img = cv.imread(imgPath)
     imgRGB = cv.cvtColor(img, cv.COLOR_BGR2RGB)
 
@@ -113,14 +120,17 @@ def DecodeDataFromImage(imgPath, password):
             j -= passwordValue
             jumpedForward = False
         jumpCount += 1
-        print(j, len(imgRGB[0]), jumpCount, (passwordValue+1)*2, jumpCount == (passwordValue+1)*2-1)
+        # print(j, len(imgRGB[0]), jumpCount, (passwordValue+1)*2, jumpCount == (passwordValue+1)*2-1)
         if jumpCount == (passwordValue+1)*2-1:
             jumpedForward = False
             jumpCount = 0
     print("".join(pixelLSBValues[:100]))
     print("passwordValue: ", passwordValue)
-
-    return BitStringToString("".join(pixelLSBValues[:len(pixelLSBValues)-len(key)]))
+    print(key)
+    if not keyFound:
+        return None, "Key not found!"
+    return BitStringToString("".join(pixelLSBValues[:len(pixelLSBValues)-len(key)])), None
+    
 
 def PasswordValueCalculation(password, imgRGB):
     passwordValue = 0
@@ -129,9 +139,12 @@ def PasswordValueCalculation(password, imgRGB):
     for char in password:
         passwordValue += ord(char) 
     
-    passwordValue = passwordValue%len(imgRGB) # Normalize passwordValue within the bounds of image pixel length
+    passwordValue = passwordValue%len(imgRGB) # normalize passwordValue within the bounds of image pixel length
 
     return passwordValue
+
+def StringToBinary(s):
+    return ''.join(format(ord(char), '08b') for char in s)
 
 class Root:
     @cherrypy.expose
@@ -179,7 +192,10 @@ class Root:
     def decode(self, fileName, password):
         imgPath = os.path.join("images/", fileName)
         print("imgPath: ", imgPath, "password: ", password)
-        return encode(DecodeDataFromImage(imgPath, password))
+        result, err = DecodeDataFromImage(imgPath, password)
+        if err:
+            return encode({"error": 'Wrong password!'})
+        return encode(result)
     
     
     @cherrypy.expose
