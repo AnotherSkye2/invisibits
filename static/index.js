@@ -5,7 +5,7 @@ async function UploadHandler() {
             URL.revokeObjectURL(img.src);  // no longer needed, free memory
         }
         img.src = URL.createObjectURL(this.files[0]);
-
+        console.log(img, img.height)
         const imgForm = document.querySelector(`div[id=${this.id}] #img-form`)
         const input = document.querySelector(`div[id=${this.id}] input[type="file"]`)
         console.log(imgForm, input, this.files, this.id, img)
@@ -37,9 +37,24 @@ async function EncodeHandler(e) {
     const hasMoreThanAscii = [...inputString].some(char => char.charCodeAt(0) > 127);
     console.log("hasMoreThanAscii: ", hasMoreThanAscii, inputString)
     if (hasMoreThanAscii) {
-        console.error("Input string has non-ASCII characters!", inputString)
+        const errorMessage = document.querySelector('#errorMessage')
+        const errorString = "Input string has non-ASCII characters!"
+        errorMessage.innerHTML = errorString
+        console.error(errorString, inputString)
         return
     }
+    var img = document.querySelector(`div[id="encode"] img`);
+    console.log(img)
+    const height = img.height;
+    const width = img.width;
+    if (inputString.length*8 > height*width) {
+        const errorMessage = document.querySelector('#errorMessage')
+        const errorString = "Message is too long!"
+        errorMessage.innerHTML = errorString
+        console.error(errorString, inputString)
+        return
+    }
+
     const fileNameArray = imgInput.value.split("\\")
     const fullFileName = fileNameArray[fileNameArray.length-1]
     console.log(formData, fullFileName)
