@@ -1,12 +1,3 @@
-async function logSubmit(event) {
-    event.preventDefault();
-    try {
-        window.location.href = "http://localhost:8001/generate"
-    } catch(err) {
-        console.error(err)
-    }
-}
-
 async function UploadHandler() {
     if (this.files && this.files[0]) {
         var img = document.querySelector(`div[id=${this.id}] img`);
@@ -38,14 +29,15 @@ async function UploadHandler() {
 
 async function EncodeHandler(e) {
     e.preventDefault()
-    const input = document.querySelector('div[id="encode"] input[type="file"]')
+    const imgInput = document.querySelector('div[id="encode"] input[type="file"]')
+    const passwordInput = document.querySelector('div[id="encode"] #password')
     const textForm = document.querySelector('div[id="encode"] #text-form')
     const formData = new FormData(textForm)
-    const fileNameArray = input.value.split("\\")
+    const fileNameArray = imgInput.value.split("\\")
     const fullFileName = fileNameArray[fileNameArray.length-1]
     console.log(formData, fullFileName)
     try {
-        const response = await fetch(`./encode?fileName=${fullFileName}`, {
+        const response = await fetch(`./encode?fileName=${fullFileName}&password=${passwordInput.value}`, {
             method: "POST",
             body: formData
         })
@@ -63,18 +55,21 @@ async function EncodeHandler(e) {
 
 async function DecodeHandler(e) {
     e.preventDefault()
-    const input = document.querySelector('div[id="decode"] input[type="file"]')
-    const fileNameArray = input.value.split("\\")
+    const imgInput = document.querySelector('div[id="decode"] input[type="file"]')
+    const passwordInput = document.querySelector('div[id="decode"] #password')
+    const fileNameArray = imgInput.value.split("\\")
     const fullFileName = fileNameArray[fileNameArray.length-1]
     console.log(fullFileName)
     try {
-        const response = await fetch(`./decode?fileName=${fullFileName}`, {
+        const response = await fetch(`./decode?fileName=${fullFileName}&password=${passwordInput.value}`, {
             method: "POST",
         })
         console.log(response)
 
         if(!response.ok) throw new Error(response.statusText)
         const data = await response.json()
+        const textInput = document.querySelector('div[id="decode"] #output')
+        textInput.value = data
         console.log(data)
         console.log(response.statusText)
     } catch(err) {
