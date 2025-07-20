@@ -25,12 +25,8 @@ def EncodeDataIntoImage(inputString, imgPath, fullFileName, password):
     bitArrayString = ' '.join('{0:08b}'.format(ord(x), 'b') for x in inputString+key).replace(" ", "")    
     print(bitArrayString)
 
-    passwordValue = 0
-    for char in password:
-        passwordValue += ord(char) 
-    
-    passwordValue = passwordValue%len(imgRGB) # Normalize passwordValue within the bounds of image pixel length
-   
+    passwordValue = PasswordValueCalculation(password)
+
     print("passwordValue: ", passwordValue)
     
     for i in range(len(imgRGB)):
@@ -38,10 +34,10 @@ def EncodeDataIntoImage(inputString, imgPath, fullFileName, password):
             break
         else:
             print("new row!")
+            jumpCount = 0
             j = 0
             jumpedForward = False
             while j < len(imgRGB[i]):
-                print(j, len(imgRGB[i]))
                 pixel = imgRGB[i, j]
                 for k in range(len(pixel)):
                     if len(bitArrayString) <= 0:
@@ -52,7 +48,6 @@ def EncodeDataIntoImage(inputString, imgPath, fullFileName, password):
                         else:
                             imgRGB[i, j][k] += 1
                     bitArrayString = bitArrayString[1:]
-                print(jumpedForward)
                 if passwordValue == 0:
                     j += 1
                     continue
@@ -62,7 +57,11 @@ def EncodeDataIntoImage(inputString, imgPath, fullFileName, password):
                 elif jumpedForward == True:
                     j -= passwordValue
                     jumpedForward = False
-      
+                jumpCount += 1
+                print(j, len(imgRGB[i]), jumpCount, (passwordValue+1)*2, jumpCount == (passwordValue+1)*2-1)
+                if jumpCount == (passwordValue+1)*2-1:
+                    jumpedForward = False
+                    jumpCount = 0
     print(imgRGB[0][0])
 
     fileNameArray = fullFileName.split('.')
@@ -79,12 +78,8 @@ def DecodeDataFromImage(imgPath, password):
     img = cv.imread(imgPath)
     imgRGB = cv.cvtColor(img, cv.COLOR_BGR2RGB)
 
-    passwordValue = 0
-    for char in password:
-        passwordValue += ord(char) 
-    
-    passwordValue = passwordValue%len(imgRGB) # Normalize passwordValue within the bounds of image pixel length
-   
+    passwordValue = PasswordValueCalculation(password)
+
     print("passwordValue: ", passwordValue)
 
     pixelLSBValues = []
@@ -92,11 +87,10 @@ def DecodeDataFromImage(imgPath, password):
     for i in range(len(imgRGB)):
         if keyFound:
             break
-        print("new row!")
+        jumpCount = 0
         j = 0
         jumpedForward = False
         while j < len(imgRGB[i]):
-            print(j, len(imgRGB[i]))
             if keyFound:
                 break
             pixel = imgRGB[i, j]
@@ -119,8 +113,27 @@ def DecodeDataFromImage(imgPath, password):
             elif jumpedForward == True:
                 j -= passwordValue
                 jumpedForward = False
-    print("".join(pixelLSBValues))
+            jumpCount += 1
+            print(j, len(imgRGB[i]), jumpCount, (passwordValue+1)*2, jumpCount == (passwordValue+1)*2-1)
+            if jumpCount == (passwordValue+1)*2-1:
+                jumpedForward = False
+                jumpCount = 0
+    print("".join(pixelLSBValues[:100]))
+    print("passwordValue: ", passwordValue)
+
     return BitStringToString("".join(pixelLSBValues[:len(pixelLSBValues)-len(key)]))
+
+def PasswordValueCalculation(password):
+    passwordValue = 0
+    for char in password:
+        passwordValue += ord(char) 
+    
+    # passwordValue = passwordValue%len(imgRGB) # Normalize passwordValue within the bounds of image pixel length
+   
+    # TESTING!!!
+    passwordValue = passwordValue%10
+    # TESTING!!!
+    return passwordValue
 
 class Root:
     @cherrypy.expose
