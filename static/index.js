@@ -33,6 +33,13 @@ async function EncodeHandler(e) {
     const passwordInput = document.querySelector('div[id="encode"] #password')
     const textForm = document.querySelector('div[id="encode"] #text-form')
     const formData = new FormData(textForm)
+    const inputString = formData.get("inputString")
+    const hasMoreThanAscii = [...inputString].some(char => char.charCodeAt(0) > 127);
+    console.log("hasMoreThanAscii: ", hasMoreThanAscii, inputString)
+    if (hasMoreThanAscii) {
+        console.error("Input string has non-ASCII characters!", inputString)
+        return
+    }
     const fileNameArray = imgInput.value.split("\\")
     const fullFileName = fileNameArray[fileNameArray.length-1]
     console.log(formData, fullFileName)
