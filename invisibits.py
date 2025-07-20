@@ -53,6 +53,9 @@ def EncodeDataIntoImage(inputString, imgPath, fullFileName, password):
                             imgRGB[i, j][k] += 1
                     bitArrayString = bitArrayString[1:]
                 print(jumpedForward)
+                if passwordValue == 0:
+                    j += 1
+                    continue
                 if jumpedForward == False:
                     j += passwordValue+1
                     jumpedForward = True
@@ -107,6 +110,9 @@ def DecodeDataFromImage(imgPath, password):
                     pixelLSBValues.append('0')
                 else: 
                     pixelLSBValues.append('1')
+            if passwordValue == 0:
+                j += 1
+                continue
             if jumpedForward == False:
                 j += passwordValue+1
                 jumpedForward = True
