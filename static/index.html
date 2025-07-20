@@ -2,11 +2,12 @@
     <head>
         <link rel="stylesheet" href="style.css">
         <script src="index.js"></script>
+        <script type="text/javascript" src="dist/purify.min.js"></script>
     </head>
     <body>
         <div id="encode">
             <form id="img-form">
-                <input type='file' name="imgFile" accept=".png, .jpg, .jpeg"/>
+                <input type='file' name="imgFile" class="imgInput" accept=".png, .jpg, .jpeg"/>
                 <label for="password">Password:</label>
                 <input type='text' name="password" id="password"/>
             </form>
@@ -18,7 +19,7 @@
         </div>
         <div id="decode" hidden>
             <form id="img-form">
-                <input type='file' name="imgFile" accept=".png, .jpg, .jpeg"/> 
+                <input type='file' name="imgFile" class="imgInput" accept=".png, .jpg, .jpeg"/> 
                 <label for="password">Password:</label>
                 <input type='text' name="password" id="password"/>
                 <button type="submit">Decode</button>

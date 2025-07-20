@@ -4,6 +4,12 @@ async function UploadHandler() {
         img.onload = () => {
             URL.revokeObjectURL(img.src);  // no longer needed, free memory
         }
+        const maxSizeInMB = 5
+        if(this.files[0].size / (1024 ** 2) > maxSizeInMB) {
+            DisplayError("File size is too big!")
+            return
+        }
+        
         img.src = URL.createObjectURL(this.files[0]);
         console.log(img, img.height)
         const imgForm = document.querySelector(`div[id=${this.id}] #img-form`)
@@ -37,10 +43,7 @@ async function EncodeHandler(e) {
     const hasMoreThanAscii = [...inputString].some(char => char.charCodeAt(0) > 127);
     console.log("hasMoreThanAscii: ", hasMoreThanAscii, inputString)
     if (hasMoreThanAscii) {
-        const errorMessage = document.querySelector('#errorMessage')
-        const errorString = "Input string has non-ASCII characters!"
-        errorMessage.innerHTML = errorString
-        console.error(errorString, inputString)
+        DisplayError("Input string has non-ASCII characters!")
         return
     }
     var img = document.querySelector(`div[id="encode"] img`);
@@ -48,10 +51,7 @@ async function EncodeHandler(e) {
     const height = img.height;
     const width = img.width;
     if (inputString.length*8 > height*width) {
-        const errorMessage = document.querySelector('#errorMessage')
-        const errorString = "Message is too long!"
-        errorMessage.innerHTML = errorString
-        console.error(errorString, inputString)
+        DisplayError("Message is too long!")
         return
     }
 
@@ -70,9 +70,13 @@ async function EncodeHandler(e) {
         console.error(err)
     }
     const fileDownloadNameArray = fullFileName.split('.')
-    const fileExtension = fileDownloadNameArray[1]
+    const fileExtension = '.'+fileDownloadNameArray[1]
     const fileName = fileDownloadNameArray[0]
-    window.location.href = `./download?fileName=${fileName+'_steg.'+fileExtension}`
+    if (fileName.includes('_steg')) {
+        window.location.href = `./download?fileName=${fileName+fileExtension}`
+        return
+    }
+    window.location.href = `./download?fileName=${fileName+'_steg'+fileExtension}`
 }
 
 async function DecodeHandler(e) {
@@ -99,6 +103,13 @@ async function DecodeHandler(e) {
         }
         console.log(data, typeof data)
         console.log(response.statusText)
+        const decodeDiv = document.querySelector(`div[id="decode"]`)
+        const element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(data));
+        element.setAttribute('download', "output.txt");
+        element.innerHTML = "Download output"
+
+        decodeDiv.appendChild(element);
     } catch(err) {
         console.error(err)
     }
@@ -114,6 +125,12 @@ function DisplayHandler(id) {
         encodeDiv.hidden = true
         decodeDiv.hidden = false
     }
+}
+
+function DisplayError(msg) {
+    const errorMessage = document.querySelector('#errorMessage')
+    errorMessage.innerHTML = msg
+    console.error(msg)
 }
 
 window.onload = (event) => {   

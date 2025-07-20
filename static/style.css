@@ -1,3 +1,7 @@
 #errorMessage {
     color: red;
 }
+img {
+    max-width: 500;
+    max-height: 500;
+}

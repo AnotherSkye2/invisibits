@@ -69,10 +69,13 @@ def EncodeDataIntoImage(inputString, imgPath, fullFileName, password):
     print(imgRGB[0][0])
 
     fileNameArray = fullFileName.split('.')
-    fileExtension = fileNameArray[1]
+    fileExtension = "."+fileNameArray[1]
     print(fileExtension)
     fileName = fileNameArray[0]
-    plt.imsave('images/'+fileName+'_steg.'+fileExtension, imgRGB)
+    if '_steg' in fileName:
+        plt.imsave('images/'+fileName+fileExtension, imgRGB)
+        return
+    plt.imsave('images/'+fileName+'_steg'+fileExtension, imgRGB)
 
 def BitStringToString(s):
     return (int(s, 2).to_bytes((len(s) + 7) // 8, byteorder='big')).decode('utf-8')
