@@ -6,7 +6,7 @@
     <body>
         <div id="encode">
             <form id="img-form">
-                <input type='file' name="imgFile"/>
+                <input type='file' name="imgFile" accept=".png, .jpg, .jpeg"/>
                 <label for="password">Password:</label>
                 <input type='text' name="password" id="password"/>
             </form>
@@ -18,7 +18,7 @@
         </div>
         <div id="decode" hidden>
             <form id="img-form">
-                <input type='file' name="imgFile"/> 
+                <input type='file' name="imgFile" accept=".png, .jpg, .jpeg"/> 
                 <label for="password">Password:</label>
                 <input type='text' name="password" id="password"/>
                 <button type="submit">Decode</button>

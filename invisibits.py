@@ -25,7 +25,7 @@ def EncodeDataIntoImage(inputString, imgPath, fullFileName, password):
     bitArrayString = ' '.join('{0:08b}'.format(ord(x), 'b') for x in inputString+key).replace(" ", "")    
     print(bitArrayString)
 
-    passwordValue = PasswordValueCalculation(password)
+    passwordValue = PasswordValueCalculation(password, imgRGB)
 
     print("passwordValue: ", passwordValue)
     
@@ -78,7 +78,7 @@ def DecodeDataFromImage(imgPath, password):
     img = cv.imread(imgPath)
     imgRGB = cv.cvtColor(img, cv.COLOR_BGR2RGB)
 
-    passwordValue = PasswordValueCalculation(password)
+    passwordValue = PasswordValueCalculation(password, imgRGB)
 
     print("passwordValue: ", passwordValue)
 
@@ -123,16 +123,15 @@ def DecodeDataFromImage(imgPath, password):
 
     return BitStringToString("".join(pixelLSBValues[:len(pixelLSBValues)-len(key)]))
 
-def PasswordValueCalculation(password):
+def PasswordValueCalculation(password, imgRGB):
     passwordValue = 0
+    if password == "":
+        return 0
     for char in password:
         passwordValue += ord(char) 
     
-    # passwordValue = passwordValue%len(imgRGB) # Normalize passwordValue within the bounds of image pixel length
-   
-    # TESTING!!!
-    passwordValue = passwordValue%10
-    # TESTING!!!
+    passwordValue = passwordValue%len(imgRGB) # Normalize passwordValue within the bounds of image pixel length
+
     return passwordValue
 
 class Root:
