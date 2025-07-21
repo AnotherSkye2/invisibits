@@ -21,106 +21,133 @@ def EncodeDataIntoImage(inputString, imgPath, fullFileName, password):
     img = cv.imread(imgPath)
     imgRGB = cv.cvtColor(img, cv.COLOR_BGR2RGB)
 
-    key = "&&&"
+    if (password == ""):
+        key = "&&&"
+    else:
+        key = password
+    
     bitArrayString = ' '.join('{0:08b}'.format(ord(x), 'b') for x in inputString+key).replace(" ", "")    
     print(bitArrayString)
 
-    passwordValue = 0
-    for char in password:
-        passwordValue += ord(char) 
-    
-    passwordValue = passwordValue%len(imgRGB) # Normalize passwordValue within the bounds of image pixel length
-   
+    passwordValue = PasswordValueCalculation(password, imgRGB)
+
     print("passwordValue: ", passwordValue)
-    
-    for i in range(len(imgRGB)):
+
+    print("new row!")
+    jumpCount = 0
+    j = 0
+    jumpedForward = False
+    while j < len(imgRGB)*len(imgRGB[0]):
         if len(bitArrayString) <= 0:
             break
-        else:
-            print("new row!")
-            j = 0
+        row = j%len(imgRGB[0])
+        column = int(j/len(imgRGB[0]))
+        pixel = imgRGB[column, row]
+        for k in range(len(pixel)):
+            if len(bitArrayString) <= 0:
+                break
+            if int(bitArrayString[0]) != pixel[k] % 2:
+                if pixel[k] > 0:
+                    imgRGB[column, row][k] -= 1
+                else:
+                    imgRGB[column, row][k] += 1
+            bitArrayString = bitArrayString[1:]
+        if passwordValue == 0:
+            j += 1
+            continue
+        if jumpedForward == False:
+            j += passwordValue+1
+            jumpedForward = True
+        elif jumpedForward == True:
+            j -= passwordValue
             jumpedForward = False
-            while j < len(imgRGB[i]):
-                print(j, len(imgRGB[i]))
-                pixel = imgRGB[i, j]
-                for k in range(len(pixel)):
-                    if len(bitArrayString) <= 0:
-                        break
-                    if int(bitArrayString[0]) != pixel[k] % 2:
-                        if pixel[k] > 0:
-                            imgRGB[i, j][k] -= 1
-                        else:
-                            imgRGB[i, j][k] += 1
-                    bitArrayString = bitArrayString[1:]
-                print(jumpedForward)
-                if passwordValue == 0:
-                    j += 1
-                    continue
-                if jumpedForward == False:
-                    j += passwordValue+1
-                    jumpedForward = True
-                elif jumpedForward == True:
-                    j -= passwordValue
-                    jumpedForward = False
-      
+        jumpCount += 1
+        print(j, len(imgRGB[0]), jumpCount, (passwordValue+1)*2, jumpCount == (passwordValue+1)*2-1)
+        if jumpCount == (passwordValue+1)*2-1:
+            jumpedForward = False
+            jumpCount = 0
     print(imgRGB[0][0])
 
     fileNameArray = fullFileName.split('.')
-    fileExtension = fileNameArray[1]
+    fileExtension = "."+fileNameArray[1]
     print(fileExtension)
     fileName = fileNameArray[0]
-    plt.imsave('images/'+fileName+'_steg.'+fileExtension, imgRGB)
+    if '_steg' in fileName:
+        plt.imsave('images/'+fileName+fileExtension, imgRGB)
+        return
+    plt.imsave('images/'+fileName+'_steg'+fileExtension, imgRGB)
 
 def BitStringToString(s):
     return (int(s, 2).to_bytes((len(s) + 7) // 8, byteorder='big')).decode('utf-8')
 
 def DecodeDataFromImage(imgPath, password):
-    key = "001001100010011000100110"
+    if (password == ""):
+        key = "001001100010011000100110" # binary for "&&&"
+    else:
+        key = StringToBinary(password)
     img = cv.imread(imgPath)
     imgRGB = cv.cvtColor(img, cv.COLOR_BGR2RGB)
 
-    passwordValue = 0
-    for char in password:
-        passwordValue += ord(char) 
-    
-    passwordValue = passwordValue%len(imgRGB) # Normalize passwordValue within the bounds of image pixel length
-   
+    passwordValue = PasswordValueCalculation(password, imgRGB)
+
     print("passwordValue: ", passwordValue)
 
     pixelLSBValues = []
     keyFound = False
-    for i in range(len(imgRGB)):
+    jumpCount = 0
+    j = 0
+    jumpedForward = False
+    while j < len(imgRGB)*len(imgRGB[0]):
         if keyFound:
             break
-        print("new row!")
-        j = 0
-        jumpedForward = False
-        while j < len(imgRGB[i]):
-            print(j, len(imgRGB[i]))
-            if keyFound:
-                break
-            pixel = imgRGB[i, j]
-            for k in pixel:
-                if len(pixelLSBValues) > len(key):
-                    potentialKey = "".join(pixelLSBValues[-len(key):])
-                    if potentialKey == key:
-                        keyFound = True
-                        break
-                if(k % 2 == 0):
-                    pixelLSBValues.append('0')
-                else: 
-                    pixelLSBValues.append('1')
-            if passwordValue == 0:
-                j += 1
-                continue
-            if jumpedForward == False:
-                j += passwordValue+1
-                jumpedForward = True
-            elif jumpedForward == True:
-                j -= passwordValue
-                jumpedForward = False
-    print("".join(pixelLSBValues))
-    return BitStringToString("".join(pixelLSBValues[:len(pixelLSBValues)-len(key)]))
+        row = j%len(imgRGB[0])
+        column = int(j/len(imgRGB[0]))
+        pixel = imgRGB[column, row]
+        for k in pixel:
+            if len(pixelLSBValues) > len(key):
+                potentialKey = "".join(pixelLSBValues[-len(key):])
+                if potentialKey == key:
+                    keyFound = True
+                    break
+            if(k % 2 == 0):
+                pixelLSBValues.append('0')
+            else: 
+                pixelLSBValues.append('1')
+        if passwordValue == 0:
+            j += 1
+            continue
+        if jumpedForward == False:
+            j += passwordValue+1
+            jumpedForward = True
+        elif jumpedForward == True:
+            j -= passwordValue
+            jumpedForward = False
+        jumpCount += 1
+        # print(j, len(imgRGB[0]), jumpCount, (passwordValue+1)*2, jumpCount == (passwordValue+1)*2-1)
+        if jumpCount == (passwordValue+1)*2-1:
+            jumpedForward = False
+            jumpCount = 0
+    print("".join(pixelLSBValues[:100]))
+    print("passwordValue: ", passwordValue)
+    print(key)
+    if not keyFound:
+        return None, "Key not found!"
+    return BitStringToString("".join(pixelLSBValues[:len(pixelLSBValues)-len(key)])), None
+    
+
+def PasswordValueCalculation(password, imgRGB):
+    passwordValue = 0
+    if password == "":
+        return 0
+    for char in password:
+        passwordValue += ord(char) 
+    
+    passwordValue = passwordValue%len(imgRGB) # normalize passwordValue within the bounds of image pixel length
+
+    return passwordValue
+
+def StringToBinary(s):
+    return ''.join(format(ord(char), '08b') for char in s)
 
 class Root:
     @cherrypy.expose
@@ -168,7 +195,10 @@ class Root:
     def decode(self, fileName, password):
         imgPath = os.path.join("images/", fileName)
         print("imgPath: ", imgPath, "password: ", password)
-        return encode(DecodeDataFromImage(imgPath, password))
+        result, err = DecodeDataFromImage(imgPath, password)
+        if err:
+            return encode({"error": 'Wrong password!'})
+        return encode(result)
     
     
     @cherrypy.expose

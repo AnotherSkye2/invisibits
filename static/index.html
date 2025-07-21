@@ -2,11 +2,12 @@
     <head>
         <link rel="stylesheet" href="style.css">
         <script src="index.js"></script>
+        <script type="text/javascript" src="dist/purify.min.js"></script>
     </head>
     <body>
         <div id="encode">
             <form id="img-form">
-                <input type='file' name="imgFile"/>
+                <input type='file' name="imgFile" class="imgInput" accept=".png, .jpg, .jpeg"/>
                 <label for="password">Password:</label>
                 <input type='text' name="password" id="password"/>
             </form>
@@ -18,7 +19,7 @@
         </div>
         <div id="decode" hidden>
             <form id="img-form">
-                <input type='file' name="imgFile"/> 
+                <input type='file' name="imgFile" class="imgInput" accept=".png, .jpg, .jpeg"/> 
                 <label for="password">Password:</label>
                 <input type='text' name="password" id="password"/>
                 <button type="submit">Decode</button>
@@ -26,7 +27,13 @@
             <br><img src="#">
             <input type="text" id="output" name="outputString" readonly/>
         </div>
-        <button class="display" id="encode">Encode</button>
-        <button class="display" id="decode">Decode</button>
+        <div style="display: grid; width: 60px; gap: 15px;">
+            <label for="modeButtons">Mode:</label>
+            <div id="modeButtons" style="display: grid; width: 60px; gap: 15px;">
+                <button class="display" id="encode">Encode</button>
+                <button class="display" id="decode">Decode</button>
+            </div>
+            <p id="errorMessage" name="error"></p>
+        </div>
     </body>
 </html>

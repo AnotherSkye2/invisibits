@@ -4,8 +4,14 @@ async function UploadHandler() {
         img.onload = () => {
             URL.revokeObjectURL(img.src);  // no longer needed, free memory
         }
+        const maxSizeInMB = 5
+        if(this.files[0].size / (1024 ** 2) > maxSizeInMB) {
+            DisplayError("File size is too big!")
+            return
+        }
+        
         img.src = URL.createObjectURL(this.files[0]);
-
+        console.log(img, img.height)
         const imgForm = document.querySelector(`div[id=${this.id}] #img-form`)
         const input = document.querySelector(`div[id=${this.id}] input[type="file"]`)
         console.log(imgForm, input, this.files, this.id, img)
@@ -33,6 +39,22 @@ async function EncodeHandler(e) {
     const passwordInput = document.querySelector('div[id="encode"] #password')
     const textForm = document.querySelector('div[id="encode"] #text-form')
     const formData = new FormData(textForm)
+    const inputString = formData.get("inputString")
+    const hasMoreThanAscii = [...inputString].some(char => char.charCodeAt(0) > 127);
+    console.log("hasMoreThanAscii: ", hasMoreThanAscii, inputString)
+    if (hasMoreThanAscii) {
+        DisplayError("Input string has non-ASCII characters!")
+        return
+    }
+    var img = document.querySelector(`div[id="encode"] img`);
+    console.log(img)
+    const height = img.height;
+    const width = img.width;
+    if (inputString.length*8 > height*width) {
+        DisplayError("Message is too long!")
+        return
+    }
+
     const fileNameArray = imgInput.value.split("\\")
     const fullFileName = fileNameArray[fileNameArray.length-1]
     console.log(formData, fullFileName)
@@ -48,9 +70,13 @@ async function EncodeHandler(e) {
         console.error(err)
     }
     const fileDownloadNameArray = fullFileName.split('.')
-    const fileExtension = fileDownloadNameArray[1]
+    const fileExtension = '.'+fileDownloadNameArray[1]
     const fileName = fileDownloadNameArray[0]
-    window.location.href = `./download?fileName=${fileName+'_steg.'+fileExtension}`
+    if (fileName.includes('_steg')) {
+        window.location.href = `./download?fileName=${fileName+fileExtension}`
+        return
+    }
+    window.location.href = `./download?fileName=${fileName+'_steg'+fileExtension}`
 }
 
 async function DecodeHandler(e) {
@@ -69,9 +95,21 @@ async function DecodeHandler(e) {
         if(!response.ok) throw new Error(response.statusText)
         const data = await response.json()
         const textInput = document.querySelector('div[id="decode"] #output')
-        textInput.value = data
-        console.log(data)
+        const errorMessage = document.querySelector('#errorMessage')
+        if (data.error) {
+            errorMessage.innerHTML = data.error
+        } else {
+            textInput.value = data
+        }
+        console.log(data, typeof data)
         console.log(response.statusText)
+        const decodeDiv = document.querySelector(`div[id="decode"]`)
+        const element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(data));
+        element.setAttribute('download', "output.txt");
+        element.innerHTML = "Download output"
+
+        decodeDiv.appendChild(element);
     } catch(err) {
         console.error(err)
     }
@@ -87,6 +125,12 @@ function DisplayHandler(id) {
         encodeDiv.hidden = true
         decodeDiv.hidden = false
     }
+}
+
+function DisplayError(msg) {
+    const errorMessage = document.querySelector('#errorMessage')
+    errorMessage.innerHTML = msg
+    console.error(msg)
 }
 
 window.onload = (event) => {   
