@@ -36,9 +36,8 @@ async function UploadHandler() {
 async function EncodeHandler(e) {
     e.preventDefault()
     const imgInput = document.querySelector('div[id="encode"] input[type="file"]')
-    const passwordInput = document.querySelector('div[id="encode"] #password')
-    const textForm = document.querySelector('div[id="encode"] #text-form')
-    const formData = new FormData(textForm)
+    const imgForm = document.querySelector('div[id="encode"] #img-form')
+    const formData = new FormData(imgForm)
     const inputString = formData.get("inputString")
     const hasMoreThanAscii = [...inputString].some(char => char.charCodeAt(0) > 127);
     console.log("hasMoreThanAscii: ", hasMoreThanAscii, inputString)
@@ -59,7 +58,7 @@ async function EncodeHandler(e) {
     const fullFileName = fileNameArray[fileNameArray.length-1]
     console.log(formData, fullFileName)
     try {
-        const response = await fetch(`./encode?fileName=${fullFileName}&password=${passwordInput.value}`, {
+        const response = await fetch(`./encode?`, {
             method: "POST",
             body: formData
         })
@@ -103,13 +102,13 @@ async function DecodeHandler(e) {
         }
         console.log(data, typeof data)
         console.log(response.statusText)
-        const decodeDiv = document.querySelector(`div[id="decode"]`)
+        const outputDiv = document.querySelector(`div[id="outputDiv"]`)
         const element = document.createElement('a');
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(data));
         element.setAttribute('download', "output.txt");
         element.innerHTML = "Download output"
 
-        decodeDiv.appendChild(element);
+        outputDiv.appendChild(element);
     } catch(err) {
         console.error(err)
     }
@@ -119,11 +118,11 @@ function DisplayHandler(id) {
     const encodeDiv = document.querySelector(`div[id="encode"]`)
     const decodeDiv = document.querySelector(`div[id="decode"]`)
     if (id == "encode") {
-        encodeDiv.hidden = false
-        decodeDiv.hidden = true
+        encodeDiv.classList.remove("hidden")
+        decodeDiv.classList.add("hidden")
     } else {
-        encodeDiv.hidden = true
-        decodeDiv.hidden = false
+        encodeDiv.classList.add("hidden")
+        decodeDiv.classList.remove("hidden")
     }
 }
 
@@ -137,16 +136,16 @@ window.onload = (event) => {
     console.log("page is fully loaded");
     const encodeInput = document.querySelector('div[id="encode"] input[type="file"]')
     const decodeInput = document.querySelector('div[id="decode"] input[type="file"]')
-    const textForm = document.querySelector('div[id="encode"] #text-form')
-    const imgForm = document.querySelector('div[id="decode"] #img-form')
+    const encodeForm = document.querySelector('div[id="encode"] #img-form')
+    const decodeForm = document.querySelector('div[id="decode"] #img-form')
     const displayButtons = document.getElementsByClassName('display')
     console.log(encodeInput.id)
     encodeInput.id = "encode"
     decodeInput.id = "decode"
     encodeInput.addEventListener('change', UploadHandler)
     decodeInput.addEventListener('change', UploadHandler)
-    textForm.addEventListener('submit', EncodeHandler)
-    imgForm.addEventListener('submit', DecodeHandler)
+    encodeForm.addEventListener('submit', EncodeHandler)
+    decodeForm.addEventListener('submit', DecodeHandler)
     for(let button of displayButtons) {
         button.addEventListener('click', () => DisplayHandler(button.id))
     };
