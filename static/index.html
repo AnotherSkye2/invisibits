@@ -5,35 +5,39 @@
         <script type="text/javascript" src="dist/purify.min.js"></script>
     </head>
     <body>
-        <div id="encode">
-            <form id="img-form">
-                <input type='file' name="imgFile" class="imgInput" accept=".png, .jpg, .jpeg"/>
-                <label for="password">Password:</label>
-                <input type='text' name="password" id="password"/>
-            </form>
-            <br><img src="#">
-            <form id="text-form">
-                <input type="text" name="inputString"/>
-                <button type="submit">Encode</button>
-            </form>
-        </div>
-        <div id="decode" hidden>
-            <form id="img-form">
-                <input type='file' name="imgFile" class="imgInput" accept=".png, .jpg, .jpeg"/> 
-                <label for="password">Password:</label>
-                <input type='text' name="password" id="password"/>
-                <button type="submit">Decode</button>
-            </form>
-            <br><img src="#">
-            <input type="text" id="output" name="outputString" readonly/>
-        </div>
-        <div style="display: grid; width: 60px; gap: 15px;">
-            <label for="modeButtons">Mode:</label>
-            <div id="modeButtons" style="display: grid; width: 60px; gap: 15px;">
-                <button class="display" id="encode">Encode</button>
-                <button class="display" id="decode">Decode</button>
+        <div id="content" class="grid">
+            <div id="encode">
+                <form id="img-form" class="grid">
+                    <input type='file' name="fileName" class="imgInput" accept=".png, .jpg, .jpeg" required/>
+                    <br><img src="#">
+                    <label for="password">Password:</label>
+                    <input type='text' name="password" id="password"/>
+                    <label for="inputString">Your message:</label>
+                    <input type="text" name="inputString" required/>
+                    <button type="submit">Encode</button>
+                </form>
             </div>
-            <p id="errorMessage" name="error"></p>
+            <div id="decode" class="grid hidden">
+                <form id="img-form" class="grid">
+                    <input type='file' name="imgFile" class="imgInput" accept=".png, .jpg, .jpeg" required/> 
+                    <br><img src="#">
+                    <label for="password">Password:</label>
+                    <input type='text' name="password" id="password"/>
+                    <button type="submit">Decode</button>
+                </form>
+                <div id="outputDiv" class="grid">
+                    <label for="inputString">The message:</label>
+                    <textarea type="text" id="output" name="outputString" readonly></textarea>
+                </div>
+            </div>
+            <div id="mode" class="grid">
+                <label for="modeButtons">Mode</label>
+                <div id="modeButtons">
+                    <button class="display" id="encode">Encode</button>
+                    <button class="display" id="decode">Decode</button>
+                </div>
+                <p id="errorMessage" name="error"></p>
+            </div>
         </div>
     </body>
 </html>

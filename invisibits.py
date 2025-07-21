@@ -1,7 +1,6 @@
 import cv2 as cv
 import os
 import matplotlib.pyplot as plt
-from dotenv import load_dotenv
 import cherrypy
 from cherrypy._json import encode
 from cherrypy.lib.static import serve_download
