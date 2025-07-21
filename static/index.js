@@ -13,14 +13,12 @@ async function UploadHandler() {
         img.src = URL.createObjectURL(this.files[0]);
         console.log(img, img.height)
         const imgForm = document.querySelector(`div[id=${this.id}] #img-form`)
-        const input = document.querySelector(`div[id=${this.id}] input[type="file"]`)
-        console.log(imgForm, input, this.files, this.id, img)
         const formData = new FormData(imgForm)
-        const fileNameArray = input.value.split("\\")
-        const fullFileName = fileNameArray[fileNameArray.length-1]
-        console.log(formData, imgForm, fullFileName)
+        formData.append("fileName", formData.get("imgFile").name)
+        formData.delete("inputString")
+        console.log(...formData, imgForm)
         try {
-            const response = await fetch(`./upload?fileName=${fullFileName}`, {
+            const response = await fetch(`./upload?`, {
                 method: "POST",
                 body: formData
             })
@@ -56,9 +54,11 @@ async function EncodeHandler(e) {
 
     const fileNameArray = imgInput.value.split("\\")
     const fullFileName = fileNameArray[fileNameArray.length-1]
-    console.log(formData, fullFileName)
+    formData.append("fileName", formData.get("imgFile").name)
+    formData.delete("imgFile")
+    console.log(...formData, fullFileName)
     try {
-        const response = await fetch(`./encode?`, {
+        const response = await fetch(`./encode`, {
             method: "POST",
             body: formData
         })
@@ -90,25 +90,29 @@ async function DecodeHandler(e) {
             method: "POST",
         })
         console.log(response)
+        const errorMessage = document.querySelector('#errorMessage')
 
-        if(!response.ok) throw new Error(response.statusText)
+        if(!response.ok) {
+            errorMessage.innerHTML = response.statusText
+            throw new Error(response.statusText)
+        }
         const data = await response.json()
         const textInput = document.querySelector('div[id="decode"] #output')
-        const errorMessage = document.querySelector('#errorMessage')
         if (data.error) {
             errorMessage.innerHTML = data.error
         } else {
             textInput.value = data
+            const outputDiv = document.querySelector(`div[id="outputDiv"]`)
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(data));
+            element.setAttribute('download', "output.txt");
+            element.innerHTML = "Download output"
+            outputDiv.appendChild(element);
         }
-        console.log(data, typeof data)
+        console.log(textInput)
         console.log(response.statusText)
-        const outputDiv = document.querySelector(`div[id="outputDiv"]`)
-        const element = document.createElement('a');
-        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(data));
-        element.setAttribute('download', "output.txt");
-        element.innerHTML = "Download output"
 
-        outputDiv.appendChild(element);
+
     } catch(err) {
         console.error(err)
     }

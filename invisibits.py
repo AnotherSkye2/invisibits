@@ -195,7 +195,8 @@ class Root:
         imgPath = os.path.join("images/", fileName)
         print("imgPath: ", imgPath, "password: ", password)
         result, err = DecodeDataFromImage(imgPath, password)
-        if err:
+        print("The result is: ", result)
+        if err or result == None:
             return encode({"error": 'Wrong password!'})
         return encode(result)
     
