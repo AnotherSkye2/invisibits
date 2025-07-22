@@ -208,8 +208,19 @@ class Root:
     
     index_shtml = index_html = index_htm = index_php = index
 
+def CreateDirectory(directoryName):
+    try:
+        os.mkdir(directoryName)
+        print(f"Directory '{directoryName}' created successfully.")
+    except FileExistsError:
+        print(f"Directory '{directoryName}' already exists.")
+    except PermissionError:
+        print(f"Permission denied: Unable to create '{directoryName}'.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 if __name__=='__main__':
+    CreateDirectory("images")
     location = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'static')  
     print( "\nstatic_dir: %s\n" % location)
 
@@ -228,3 +239,5 @@ if __name__=='__main__':
     }
 
     cherrypy.quickstart(Root(), '/', config=conf)
+
+
