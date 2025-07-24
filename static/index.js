@@ -1,6 +1,7 @@
-import { UploadHandler } from "./methods/UploadHandler";
-import { EncodeHandler } from "./methods/EncodeHandler";
-import { DecodeHandler } from "./methods/DecodeHandler";
+import { UploadHandler } from "./handlers/UploadHandler.js";
+import { EncodeHandler } from "./handlers/EncodeHandler.js";
+import { DecodeHandler } from "./handlers/DecodeHandler.js";
+import { DisplayHandler } from "./handlers/DisplayHandler.js";
 
 window.onload = () => {   
     console.log("page is fully loaded");
