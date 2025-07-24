@@ -1,3 +1,5 @@
+import os
+
 def bitStringToString(s):
     return (int(s, 2).to_bytes((len(s) + 7) // 8, byteorder='big')).decode('utf-8')
 
@@ -14,3 +16,14 @@ def passwordValueCalculation(password, imgRGB):
 
 def stringToBinary(s):
     return ''.join(format(ord(char), '08b') for char in s)
+
+def createDirectory(directoryName):
+    try:
+        os.mkdir(directoryName)
+        print(f"Directory '{directoryName}' created successfully.")
+    except FileExistsError:
+        print(f"Directory '{directoryName}' already exists.")
+    except PermissionError:
+        print(f"Permission denied: Unable to create '{directoryName}'.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
