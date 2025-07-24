@@ -22,10 +22,14 @@ export async function EncodeHandler(e) {
     }
 
     const fileNameArray = imgInput.value.split("\\")
-    const fullFileName = fileNameArray[fileNameArray.length-1]
-    formData.append("fileName", formData.get("imgFile").name)
+    let fullFileName = fileNameArray[fileNameArray.length-1]
+
+    if (fullFileName.includes(".jpg") || fullFileName.includes(".JPG")) {
+        fullFileName = fullFileName.slice(0, -4) + ".png"
+    }
+    formData.append("fileName", fullFileName)
     formData.delete("imgFile")
-    console.log(...formData, fullFileName)
+    console.log(...formData, fullFileName, fullFileName.slice(0, -4))
     try {
         const response = await fetch(`./encode`, {
             method: "POST",

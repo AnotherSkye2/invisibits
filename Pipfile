@@ -7,6 +7,7 @@ name = "pypi"
 matplotlib = "*"
 opencv-python = "*"
 cherrypy = {extras = ["json"], version = "*"}
+pillow = "*"
 
 [dev-packages]
 
