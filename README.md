@@ -28,4 +28,4 @@ This time I created a web application that allows users to encode text messages 
 
 **And you're all good to go!**
 ## Usage
-To use the application, run `python3 invisibits.py` and follow the link in the terminal. (http://localhost:8001)
+To use the application, run `python3 src` and follow the link in the terminal. (http://localhost:8001)
