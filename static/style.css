@@ -1,7 +1,77 @@
+body {
+    font-size: 24px;
+}
+
 #errorMessage {
     color: red;
 }
 img {
     max-width: 500;
     max-height: 500;
+    margin:  0 auto;
+}
+
+.grid {
+    display: grid;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+#content {
+    height: 100vh;
+}
+
+#mode {
+    gap: 1em;
+}
+
+#encode {
+    display: grid;
+}
+
+#mode label {
+    text-align: center;
+}
+
+#modeButtons {
+    display: flex;
+    gap: 2em;
+}
+
+button {
+    text-align: center;
+    width: 12em;
+    height: 3em;
+    color: white;
+    background-color: black;
+    border-color: white;
+    box-shadow: 1em 0.5em grey;
+}
+
+button[type="submit"] {
+    height: 2em;
+    color: black;
+    background-color: white;
+    border-color: rgb(0, 0, 0);
+    box-shadow: 1em 0.5em;
+}
+
+input::file-selector-button {
+    color: black;
+    background-color: white;
+}
+
+.hidden {
+    display: none !important;
+}
+
+#img-form {
+    gap: 1em;
+}
+
+#output {
+    padding-top: 1em;
+    width: 40em;
+    height: 20vh;
 }
