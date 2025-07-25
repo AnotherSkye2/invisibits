@@ -1,6 +1,7 @@
 import os
 from cherrypy._json import encode
 from methods import encodeDataIntoImage, decodeDataFromImage
+from PIL import Image
 
 
 def encodeHandler(self, inputString, fileName, password, imgDir):
@@ -14,12 +15,10 @@ def encodeHandler(self, inputString, fileName, password, imgDir):
     return out
 
 def uploadHandler(self, imgFile, fileName, imgDir): 
-    upload_filename = fileName
-
     print("\nimgFile: ", imgFile, "\nfileName: ", fileName)
 
     upload_file = os.path.normpath(
-        os.path.join(imgDir, upload_filename))
+        os.path.join(imgDir, fileName))
     size = 0
     with open(upload_file, 'wb') as out:
         while True:
@@ -28,6 +27,14 @@ def uploadHandler(self, imgFile, fileName, imgDir):
                 break
             out.write(data)
             size += len(data)
+    if ".jpg" or ".JPG" in fileName:
+        im = Image.open(upload_file)
+        fileName = fileName.replace(".jpg", ".png")
+        fileName = fileName.replace(".JPG", ".png")
+        im.save(os.path.normpath(
+        os.path.join(imgDir, fileName)))
+        print("fileName:", fileName, im)
+
     out = '''
     File received.
     Filename: {}
